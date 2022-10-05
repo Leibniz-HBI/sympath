@@ -5,6 +5,8 @@ Processing nested data structure with ease
 ## Usage
 
 ```python
+from sympath import Sympath
+
 a = {
         "nested": {
             "key1": "Captain",
@@ -27,8 +29,10 @@ sydestructure(a)
 
 sydestructure(b)
 >>> {"name": "Venetian", "last_name": "Trombone"}
-```
 
+sysdestructure({})
+>>> None
+```
 
 ## Developer Installation
 
