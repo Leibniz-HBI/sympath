@@ -28,6 +28,3 @@ addopts = "--cov-report html:tests/coverage --cov=sympath --capture=sys"
 
 [tool.isort]
 profile = "black"
-
-[tool.poetry.scripts]
-sympath = 'sympath.main:cli'
