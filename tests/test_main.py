@@ -63,6 +63,46 @@ def test_sympath_3():
     assert sydestructure(test_input) == {"name": "Captain", "last_name": "Picard"}
 
 
+def test_foreach_select_map():
+    """layout and test the steps of sympath"""
+    test_input = {
+        "nested": [
+            {"key1": "Captain", "key2": "Picard"},
+            {"key1": "Captain", "key2": "Picard"},
+        ]
+    }
+
+    sydestructure = Sympath().nested.for_each(
+        Sympath().select(name="key1", last_name="key2").map(lambda x: x.upper())
+    )
+
+    assert sydestructure(test_input) == [
+        {"name": "CAPTAIN", "last_name": "PICARD"},
+        {"name": "CAPTAIN", "last_name": "PICARD"},
+    ]
+
+
+def test_foreach_select_reduce():
+    """layout and test the steps of sympath"""
+    test_input = {
+        "nested": [
+            {"key1": "Captain", "key2": "Picard"},
+            {"key1": "Captain", "key2": "Picard"},
+        ]
+    }
+
+    sydestructure = Sympath().nested.for_each(
+        Sympath()
+        .select(name="key1", last_name="key2")
+        .reduce(lambda y, x: " ".join([y, x]))
+    )
+
+    assert sydestructure(test_input) == [
+        "Captain Picard",
+        "Captain Picard",
+    ]
+
+
 def test_list_indexing():
     """Test whether list indexing with ints goes according to plan"""
     test_input = {"nested": [{"hello": "World"}]}

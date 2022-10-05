@@ -27,6 +27,17 @@ class Map:
 
 
 @dataclass
+class Reduce:
+    """Reduce"""
+
+    function: Callable
+
+    def apply(self, data):
+        """reduce adata item to a single item"""
+        return reduce(self.function, data if isinstance(data, list) else data.values())
+
+
+@dataclass
 class ForEach:
     """For Each entry at this point do the chain after this"""
 
@@ -75,12 +86,8 @@ class Sympath:
                 if isinstance(key, str):
                     if key in carry:
                         return carry[key]
-                if isinstance(key, Map):
+                if isinstance(key, (Map, Select, ForEach, Reduce)):
                     return key.apply(carry)
-                if isinstance(key, Select):
-                    return key.apply(carry)
-                if isinstance(key, Sympath):
-                    return [key(_) for _ in carry]
             return None
 
         return reduce(reducer, self.path, data)
@@ -103,10 +110,15 @@ class Sympath:
 
     def for_each(self, sympath):
         """apply a Sympath to every entry"""
-        self.path.append(sympath)
+        self.path.append(ForEach(sympath))
         return self
 
     def select(self, **kwargs):
         """Select/Rename keys"""
         self.path.append(Select(**kwargs))
+        return self
+
+    def reduce(self, func: Callable):
+        """reduce the current items"""
+        self.path.append(Reduce(func))
         return self
