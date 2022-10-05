@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 from functools import reduce, singledispatchmethod
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 
 @dataclass
@@ -30,6 +30,12 @@ class Map:
 class ForEach:
     """For Each entry at this point do the chain after this"""
 
+    sympath: "Sympath"
+
+    def apply(self, data: List):
+        """Apply the sub-Sympath to data"""
+        return [self.sympath(_) for _ in data]
+
 
 @dataclass
 class Select:
@@ -41,6 +47,9 @@ class Select:
     def apply(self, data: Dict):
         """applies the select to the input data"""
         return {k: data.get(v) for k, v in self.mapper.items()}
+
+    def __repr__(self) -> str:
+        return "select " + " ".join([f"{k}={v}" for k, v in self.mapper.items()])
 
 
 class Sympath:
@@ -57,36 +66,47 @@ class Sympath:
         self.path.append(key)
         return self
 
-    def map(self, func):
-        """apply a function to every entry"""
-        self.path.append(Map(func))
-        return self
-
-    def for_each(self):
-        """apply a Sympath to every entry"""
-        self.path.append(ForEach())
-        return self
-
-    def select(self, **kwargs):
-        """Select/Rename keys"""
-        self.path.append(Select(**kwargs))
-        return self
-
     def __call__(self, data) -> Any:
         def reducer(carry, key):
 
-            print(key, carry)
-
             if carry is not None:
-                if isinstance(key, (str, int)):
+                if isinstance(key, int):
+                    return carry[key]
+                if isinstance(key, str):
                     if key in carry:
                         return carry[key]
                 if isinstance(key, Map):
                     return key.apply(carry)
                 if isinstance(key, Select):
                     return key.apply(carry)
-                if isinstance(key, ForEach):
-                    pass
+                if isinstance(key, Sympath):
+                    return [key(_) for _ in carry]
             return None
 
         return reduce(reducer, self.path, data)
+
+    def __repr__(self) -> str:
+        return f'<Sympath {" > ".join([str(_) for _ in self.path])}>'
+
+    def map(self, func: Callable):
+        """apply a function to every entry
+
+        params:
+          func: Callable
+            Callback function that is passed each item
+
+        returns:
+          Whatever the data structure has or None
+        """
+        self.path.append(Map(func))
+        return self
+
+    def for_each(self, sympath):
+        """apply a Sympath to every entry"""
+        self.path.append(sympath)
+        return self
+
+    def select(self, **kwargs):
+        """Select/Rename keys"""
+        self.path.append(Select(**kwargs))
+        return self
