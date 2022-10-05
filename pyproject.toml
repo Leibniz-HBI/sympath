@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "sympath"
+version = "0.1.0"
+description = "Processing nested data structure with ease"
+authors = ["Philipp Kessling"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+click = "^8.1.3"
+loguru = "^0.6.0"
+PyYAML = "^6.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.2"
+pytest-cov = "^3.0.0"
+black = "^22.6.0"
+coverage = "^6.4.2"
+pdoc3 = "^0.10.0"
+pre-commit = "^2.20.0"
+isort = "^5.10.1"
+pylint = "^2.14.5"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+addopts = "--cov-report html:tests/coverage --cov=sympath --capture=sys"
+
+[tool.isort]
+profile = "black"
+
+[tool.poetry.scripts]
+sympath = 'sympath.main:cli'
